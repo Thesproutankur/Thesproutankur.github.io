@@ -82,6 +82,9 @@
                             if (code) {
                                 scannedCode = code.data;
 
+                                // Log the scanned data
+                                console.log("Detected QR code data:", scannedCode);
+
                                 // Check if the scanned code matches the validation pattern
                                 const validationPattern = /^[A-Z0-9]{16}$/;
                                 if (validationPattern.test(scannedCode)) {
