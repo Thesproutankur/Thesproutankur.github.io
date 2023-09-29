@@ -63,13 +63,13 @@
                     console.error(err);
                     return;
                 }
-                Qagga.start();
+                quagga.start();
             });
 
             // Listen for successful scans
-            Qagga.onDetected(result => {
+            quagga.onDetected(result => {
                 scannedCode = result.codeResult.code;
-                Qagga.stop();
+                quagga.stop();
                 form.style.display = "block";
             });
         });
