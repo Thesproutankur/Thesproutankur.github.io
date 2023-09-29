@@ -33,7 +33,7 @@
         <button id="submitButton">Submit</button>
     </div>
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/quagga@latest/dist/quagga.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsqr@1.0.2/dist/jsQR.min.js"></script>
     <script>
         const startScanButton = document.getElementById("startScanButton");
         const form = document.getElementById("form");
@@ -42,51 +42,56 @@
 
         let scannedCode = "";
 
-        // Ensure Quagga is properly loaded
-        Quagga.onProcessed(function(result) {
-            // Add a log statement to check if this function is reached
-            console.log("Processed result:", result);
-        });
-
-        Quagga.onDetected(function(result) {
-            // Add a log statement to check if this function is reached
-            console.log("Detected result:", result);
-        });
-
         startScanButton.addEventListener("click", () => {
             // Request camera access and start the QR code scanner
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector("#scanner"),
-                    constraints: {
-                        width: 640,
-                        height: 480,
-                        facingMode: "environment",
-                    },
-                },
-                decoder: {
-                    // Use "qrcode_reader" for QR code reading
-                    readers: ["qrcode_reader"],
-                },
-            }, function(err) {
-                if (err) {
-                    console.error(err);
-                    return;
+            const constraints = {
+                video: {
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 }
-                console.log("Quagga initialized successfully.");
+            };
 
-                // Start Quagga after initialization
-                Quagga.start();
-            });
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(function(stream) {
+                    const video = document.createElement("video");
+                    document.body.appendChild(video);
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true); // Required to prevent Safari from scaling video
+                    video.play();
 
-            // Listen for successful scans
-            Quagga.onDetected(result => {
-                scannedCode = result.codeResult.code;
-                Quagga.stop();
-                form.style.display = "block";
-            });
+                    const canvasElement = document.createElement("canvas");
+                    const canvas = canvasElement.getContext("2d");
+                    canvasElement.style.display = "none";
+                    document.body.appendChild(canvasElement);
+
+                    const tick = () => {
+                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                            canvasElement.height = video.videoHeight;
+                            canvasElement.width = video.videoWidth;
+                            canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                            const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                            if (code) {
+                                scannedCode = code.data;
+                                video.srcObject.getTracks().forEach(track => track.stop());
+                                video.remove();
+                                canvasElement.remove();
+                                form.style.display = "block";
+                            } else {
+                                requestAnimationFrame(tick);
+                            }
+                        } else {
+                            requestAnimationFrame(tick);
+                        }
+                    };
+
+                    requestAnimationFrame(tick);
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
         });
 
         submitButton.addEventListener("click", () => {
