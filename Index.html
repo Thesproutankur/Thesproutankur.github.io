@@ -39,6 +39,7 @@
         const form = document.getElementById("form");
         const notesField = document.getElementById("notes");
         const submitButton = document.getElementById("submitButton");
+        const resultDisplay = document.createElement("div"); // Create a result display element
 
         let scannedCode = "";
 
@@ -71,6 +72,8 @@
                             canvasElement.width = video.videoWidth;
                             canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
                             const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+
+                            // Use jsQR for QR code scanning
                             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
                             if (code) {
@@ -79,6 +82,8 @@
                                 video.remove();
                                 canvasElement.remove();
                                 form.style.display = "block";
+                                resultDisplay.textContent = `QR Code Detected: ${scannedCode}`;
+                                document.body.appendChild(resultDisplay); // Display the result
                             } else {
                                 requestAnimationFrame(tick);
                             }
