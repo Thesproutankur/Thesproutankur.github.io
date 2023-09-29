@@ -33,7 +33,7 @@
         <button id="submitButton">Submit</button>
     </div>
 
-   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/quagga@latest/dist/quagga.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/quagga@latest/dist/quagga.min.js"></script>
     <script>
         const startScanButton = document.getElementById("startScanButton");
         const form = document.getElementById("form");
@@ -41,6 +41,17 @@
         const submitButton = document.getElementById("submitButton");
 
         let scannedCode = "";
+
+        // Ensure Quagga is properly loaded
+        Quagga.onProcessed(function(result) {
+            // Add a log statement to check if this function is reached
+            console.log("Processed result:", result);
+        });
+
+        Quagga.onDetected(function(result) {
+            // Add a log statement to check if this function is reached
+            console.log("Detected result:", result);
+        });
 
         startScanButton.addEventListener("click", () => {
             // Request camera access and start the QR code scanner
@@ -56,13 +67,17 @@
                     },
                 },
                 decoder: {
-                    readers: ["qrcode_reader"], // Use "qrcode_reader" for QR codes
+                    // Use "qrcode_reader" for QR code reading
+                    readers: ["qrcode_reader"],
                 },
             }, function(err) {
                 if (err) {
                     console.error(err);
                     return;
                 }
+                console.log("Quagga initialized successfully.");
+
+                // Start Quagga after initialization
                 Quagga.start();
             });
 
@@ -70,7 +85,7 @@
             Quagga.onDetected(result => {
                 scannedCode = result.codeResult.code;
                 Quagga.stop();
-                form.style.display = "block";
+                form.style display = "block";
             });
         });
 
