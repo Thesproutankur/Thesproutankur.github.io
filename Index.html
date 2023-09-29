@@ -44,7 +44,7 @@
 
         startScanButton.addEventListener("click", () => {
             // Request camera access and start the QR code scanner
-            quagga.init({
+            Quagga.init({
                 inputStream: {
                     name: "Live",
                     type: "LiveStream",
@@ -63,13 +63,13 @@
                     console.error(err);
                     return;
                 }
-                quagga.start();
+                Quagga.start();
             });
 
             // Listen for successful scans
-            quagga.onDetected(result => {
+            Quagga.onDetected(result => {
                 scannedCode = result.codeResult.code;
-                quagga.stop();
+                Quagga.stop();
                 form.style.display = "block";
             });
         });
