@@ -32,6 +32,7 @@
         <br>
         <button id="submitButton">Submit</button>
     </div>
+    <div id="resultDisplay"></div> <!-- To display the QR code result -->
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsqr@1.0.2/dist/jsQR.min.js"></script>
     <script>
@@ -39,7 +40,7 @@
         const form = document.getElementById("form");
         const notesField = document.getElementById("notes");
         const submitButton = document.getElementById("submitButton");
-        const resultDisplay = document.createElement("div"); // Create a result display element
+        const resultDisplay = document.getElementById("resultDisplay");
 
         let scannedCode = "";
 
@@ -76,14 +77,19 @@
                             // Use jsQR for QR code scanning
                             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-                            if (code) {
-                                scannedCode = code.data;
-                                video.srcObject.getTracks().forEach(track => track.stop());
-                                video.remove();
-                                canvasElement.remove();
-                                form.style.display = "block";
-                                resultDisplay.textContent = `QR Code Detected: ${scannedCode}`;
-                                document.body.appendChild(resultDisplay); // Display the result
+                            if (code && code.data) {
+                                // Check if the detected data is exactly 16 characters long and contains only letters and numbers
+                                if (isValidQRCode(code.data)) {
+                                    scannedCode = code.data;
+                                    video.srcObject.getTracks().forEach(track => track.stop());
+                                    video.remove();
+                                    canvasElement.remove();
+                                    form.style.display = "block";
+                                    resultDisplay.textContent = `QR Code Detected: ${scannedCode}`;
+                                    document.body.appendChild(resultDisplay); // Display the result
+                                } else {
+                                    requestAnimationFrame(tick);
+                                }
                             } else {
                                 requestAnimationFrame(tick);
                             }
@@ -128,6 +134,11 @@
                 alert("Error submitting data.");
             });
         });
+
+        // Add a function to check if the detected QR code data is exactly 16 characters long and contains only letters and numbers
+        function isValidQRCode(data) {
+            return /^[a-zA-Z0-9]{16}$/.test(data);
+        }
     </script>
 </body>
 </html>
