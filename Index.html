@@ -32,7 +32,6 @@
         <br>
         <button id="submitButton">Submit</button>
     </div>
-    <div id="resultDisplay"></div> <!-- To display the QR code result -->
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsqr@1.0.2/dist/jsQR.min.js"></script>
     <script>
@@ -40,9 +39,14 @@
         const form = document.getElementById("form");
         const notesField = document.getElementById("notes");
         const submitButton = document.getElementById("submitButton");
-        const resultDisplay = document.getElementById("resultDisplay");
 
         let scannedCode = "";
+
+        // Function to validate the QR code
+        function isValidQRCode(data) {
+            const regex = /^[A-Za-z0-9]{16}$/;
+            return regex.test(data);
+        }
 
         startScanButton.addEventListener("click", () => {
             // Request camera access and start the QR code scanner
@@ -73,24 +77,25 @@
                             canvasElement.width = video.videoWidth;
                             canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
                             const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-
-                            // Use jsQR for QR code scanning
                             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
                             if (code && code.data) {
+                                const detectedData = code.data;
+                                console.log("Detected QR code data:", detectedData);
+
                                 // Check if the detected data is exactly 16 characters long and contains only letters and numbers
-                                if (isValidQRCode(code.data)) {
-                                    scannedCode = code.data;
+                                if (isValidQRCode(detectedData)) {
+                                    scannedCode = detectedData;
                                     video.srcObject.getTracks().forEach(track => track.stop());
                                     video.remove();
                                     canvasElement.remove();
                                     form.style.display = "block";
-                                    resultDisplay.textContent = `QR Code Detected: ${scannedCode}`;
-                                    document.body.appendChild(resultDisplay); // Display the result
                                 } else {
+                                    console.log("Invalid QR code detected.");
                                     requestAnimationFrame(tick);
                                 }
                             } else {
+                                console.log("No QR code detected.");
                                 requestAnimationFrame(tick);
                             }
                         } else {
@@ -134,11 +139,6 @@
                 alert("Error submitting data.");
             });
         });
-
-        // Add a function to check if the detected QR code data is exactly 16 characters long and contains only letters and numbers
-        function isValidQRCode(data) {
-            return /^[a-zA-Z0-9]{16}$/.test(data);
-        }
     </script>
 </body>
 </html>
