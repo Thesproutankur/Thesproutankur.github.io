@@ -56,7 +56,7 @@
                     },
                 },
                 decoder: {
-                    readers: ["qrcode_reader"],
+                    readers: ["qrcode_reader"], // Use "qrcode_reader" for QR codes
                 },
             }, function(err) {
                 if (err) {
@@ -64,12 +64,6 @@
                     return;
                 }
                 Quagga.start();
-                
-                // Set willReadFrequently to true for the canvas element used by Quagga
-                const quaggaCanvas = document.querySelector("#scanner canvas");
-                if (quaggaCanvas) {
-                    quaggaCanvas.getContext("2d").canvas.willReadFrequently = true;
-                }
             });
 
             // Listen for successful scans
