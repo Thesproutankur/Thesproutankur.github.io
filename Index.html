@@ -92,13 +92,10 @@
                                     video.remove();
                                     canvasElement.remove();
                                     form.style.display = "block";
-                                } else {
-                                    // Invalid QR code
-                                    alert("Invalid QR code. Please try again.");
                                 }
-                            } else {
-                                requestAnimationFrame(tick);
                             }
+
+                            requestAnimationFrame(tick);
                         } else {
                             requestAnimationFrame(tick);
                         }
