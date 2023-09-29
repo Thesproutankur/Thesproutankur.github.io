@@ -21,6 +21,12 @@
             height: 200px;
             resize: vertical;
         }
+        /* Add this CSS to flip the video horizontally */
+        #scanner video {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1); /* For Safari */
+            -moz-transform: scaleX(-1); /* For Firefox */
+        }
     </style>
 </head>
 <body>
@@ -41,12 +47,6 @@
         const submitButton = document.getElementById("submitButton");
 
         let scannedCode = "";
-
-        // Function to validate the QR code
-        function isValidQRCode(data) {
-            const regex = /^[A-Za-z0-9]{16}$/;
-            return regex.test(data);
-        }
 
         startScanButton.addEventListener("click", () => {
             // Request camera access and start the QR code scanner
@@ -79,23 +79,21 @@
                             const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
                             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-                            if (code && code.data) {
-                                const detectedData = code.data;
-                                console.log("Detected QR code data:", detectedData);
+                            if (code) {
+                                scannedCode = code.data;
 
-                                // Check if the detected data is exactly 16 characters long and contains only letters and numbers
-                                if (isValidQRCode(detectedData)) {
-                                    scannedCode = detectedData;
+                                // Check if the scanned code matches the validation pattern
+                                const validationPattern = /^[A-Z0-9]{16}$/;
+                                if (validationPattern.test(scannedCode)) {
                                     video.srcObject.getTracks().forEach(track => track.stop());
                                     video.remove();
                                     canvasElement.remove();
                                     form.style.display = "block";
                                 } else {
-                                    console.log("Invalid QR code detected.");
-                                    requestAnimationFrame(tick);
+                                    // Invalid QR code
+                                    alert("Invalid QR code. Please try again.");
                                 }
                             } else {
-                                console.log("No QR code detected.");
                                 requestAnimationFrame(tick);
                             }
                         } else {
